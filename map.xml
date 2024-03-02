@@ -1,0 +1,971 @@
+<map proto="1.4.2">
+    <name>Blissful Transit CTW</name>
+    <version>1.0.0</version>
+    <objective>Gather resources, prepare ur woolroom for defending and fight at the resources arena
+        for the first 20 minutes. After that steal wool from the enemy team's woolroom and place it
+        on the monument in your ship!</objective>
+    <authors>
+        <author uuid="2fd57dff-4cff-4b60-96a4-d26e37759c03" contribution="not much" /> <!-- Furrie -->
+    </authors>
+    <contributors>
+        <contributor uuid="1987fc00-a5b2-43b5-b94b-e3c0d25776e9" contribution="Feedback" /> <!-- BrettOgden -->
+        <contributor uuid="654a9fe7-c75c-4b45-91df-8d48c4a5e072" contribution="Feedback, ideas" /> <!--Flamiix -->
+        <contributor uuid="811c1b4c-e123-421d-b918-d8fed782c639" contribution="Name suggestion" /> <!-- Gabuski -->
+        <contributor uuid="f8753ae6-a7ed-4d88-8d6d-537a5b1687e4" contribution="Feedback" /> <!-- guini2 -->
+        <contributor uuid="38ef938a-7020-4c04-9d12-4875ed0598ca" contribution="Feedback" /> <!-- Kazoha -->
+        <contributor uuid="644521d7-9437-47c1-b1d2-698eb757df3d" contribution="Feedback" /> <!-- minuyo -->
+        <contributor uuid="f690a591-348b-482e-a18d-7779d0c0a28c" contribution="XML help" /> <!-- mitchiii -->
+        <contributor uuid="f34625ab-8f27-4cb5-8424-671fa82d4033" contribution="Ideas" /> <!-- Nidho0gg -->
+        <contributor uuid="924c4e61-57b6-4931-afdb-6525b2ed34c0" contribution="Feedback, testing" /> <!-- OAF6 -->
+        <contributor uuid="e82603df-417d-4a95-bd1f-1720648be0b4" contribution="Feedback, XML help" /> <!-- Pablete1234 -->
+        <contributor uuid="75fd93dd-8e48-4698-81a2-97dae2ec5b5f" contribution="Moral support!" /> <!-- Pugzy -->
+        <contributor uuid="63ddf58a-ba2c-4d39-8481-6358bb46c63a" contribution="Feedback, ideas, XML help, testing" /> <!-- samschaap -->
+        <contributor uuid="20945afd-0a9b-4fe3-843e-5131eb036712" contribution="Name suggestion" /> <!-- Sedum_Paul -->
+        <contributor uuid="70be2310-7b19-4963-ad4c-63ef766d9412" contribution="Ideas" /> <!--SweetCarolina -->
+        <contributor uuid="4efaccb9-7535-4638-8907-47b47cf1af37" contribution="Feedback, XML help" /> <!-- TTtie -->
+        <contributor uuid="24dbb8b8-e961-43a3-8fe3-fb63e72f07b4" contribution="Feedback" /> <!-- xRob3 -->
+        <contributor uuid="510dae51-f405-4cf4-9fb6-6f1fd3f07d69" contribution="Feedback" /> <!-- Zuiuzz -->
+        <contributor uuid="9d4779a8-d35f-45d2-b51c-95de7a77e128" contribution="XML help" /> <!-- zzuf -->
+        <contributor uuid="6ff4ade9-e968-4acd-80eb-1a6fa89629fb" contribution="XML help" /> <!-- _Pear -->
+        <contributor uuid="5198dc37-537f-4ea5-8ee8-1e0952d4a36b" contribution="Feedback, name suggestion" /> <!-- _3Each -->
+    </contributors>
+    <created>2024-02-02</created>
+    <gamemode>ctw</gamemode>
+
+    <constants>
+        <constant id="team_size">32</constant>
+        <constant id="rushing_cooldown">20m</constant>
+        <constant id="build_limit_height">90</constant>
+        <constant id="lower_build_limit">40</constant>
+        <constant id="void_height">35</constant>
+        <constant id="red_wool_coords">0.5,68,127.5</constant>
+        <constant id="blue_wool_coords">0.5,68,-194.5</constant>
+        <constant id="iron_redstone_renewables_interval">4m</constant>
+        <constant id="arena_renewables_interval">4m</constant>
+        <constant id="water_renewable_interval">6m</constant>
+        <constant id="ship_renewables_interval">2m</constant>
+
+        <!-- Messages -->
+        <constant id="no_access">You can't do this! `o/map for rules</constant>
+        <constant id="no_enemy_spawn_access">You cannot enter your enemies spawn!</constant>
+        <constant id="no_wool_room_access">You cannot enter your own wool room!</constant>
+        <constant id="no_playable_area_leave_access">You cannot leave the playable area!</constant>
+        <constant id="no_enemy_exit_access">You cannot use your enemies exit! `o/map for rules</constant>
+        <constant id="rush_disabled">You can't rush for the first 20m! Go back to your base and use jump pads to get to the arena `o(/map for rules)</constant>
+        <constant id="over_build_limit_height">You've reached the maximum build height!</constant>
+        <constant id="below_build_limit">You cannot build any lower!</constant>
+        <constant id="no_defenders_jump_pad_access">Defenders can't use the jump pads! Wait for the gatherers to bring resources back or mine them inside the ship</constant>
+        <constant id="no_enemies_jump_pad_access">You cannot use the enemy team's jump pads!</constant>
+        <constant id="no_building_over_void">You cannot build over the void here!</constant>
+        <constant id="only_gatherers">Only Gatherers can mine the renewables blocks at the arena! `o/map for rules</constant>
+        <constant id="only_renewables">You can only break the renewable blocks!</constant>
+        <constant id="no_build_at_arena_access">You can't place blocks at the arena! `o/map for rules</constant>
+        <constant id="no_block_break_access">You cannot break blocks here!</constant>
+        <constant id="no_anvil_access">You cannot use anvils!</constant>
+
+        <!-- Classes  -->
+        <constant id="attacker_description">Fight, escort gatherers, earn points and steal the enemy team's wool!</constant>
+        <constant id="defender_description">Prepare your woolroom for defending, make the path to ur woolroom as hard to cross as possible!</constant>
+        <constant id="gatherer_description">Gather resources at the arena and bring them back to ur base</constant>
+    </constants>
+
+    <variables>
+        <variable id="is_using_jump_pad" scope="player" default="0" />
+        <variable id="iron_blocks_broken_count" scope="match" default="0" />
+        <variable id="redstone_blocks_broken_count" scope="match" default="0" />
+    </variables>
+
+    <rules>
+        <rule>Rushing is disabled for the first ${rushing_cooldown}</rule>
+        <rule>Defenders cannot use jump pads, meaning they can't enter the resources arena</rule>
+        <rule>Only Gatherers can mine renewable blocks at the arena</rule>
+        <rule>Gatherers cannot change their armor</rule>
+        <rule>Players can't share their tools and weapons</rule>
+        <rule>Players can't use enemy team's jump pads/arena exits</rule>
+        <rule>Players can't place blocks on the arena</rule>
+        <rule>Players can only place anti-block glitch blocks (buttons, signs) over the void next to woolrooms</rule>
+        <rule>Players can't craft bows or use anvils</rule>
+        <rule>Iron and redstone blocks get renewed after ${arena_renewables_interval} of mining all of them</rule>
+    </rules>
+
+    <broadcasts>
+        <alert after="${rushing_cooldown}" count="3" every="0.5s">`c`lRushing is now enabled! `b`oGet in position and defend your woolroom</alert>
+        <tip after="10s" every="5m">Use jump pads to get to the resources arena</tip>
+        <tip after="5m" count="5">There's water hidden under carpets at the arena</tip>
+        <tip after="20m" every="6m">Attackers can buy various helpful items in the itemshop located in their ship</tip>
+        <tip after="30s" every="5m">Use /map to read the map rules!</tip>
+        <tip after="10m" count="3">You can place anti-block glitch blocks such as buttons or signs on the side of your defense!</tip>
+        <tip after="25m" count="3">Whenever you're full invis you get Resistance I effect!</tip>
+    </broadcasts>
+    <world>
+        <timeset>1000</timeset>
+    </world>
+    <teams>
+        <team id="red" color="dark red" max="${team_size}">Red</team>
+        <team id="blue" color="blue" max="${team_size}">Blue</team>
+    </teams>
+    <wools>
+        <wool team="red" color="red" craftable="false" location="${red_wool_coords}">
+            <monument>
+                <block>-23.5,57,-175.5</block>
+            </monument>
+        </wool>
+        <wool team="blue" color="light blue" craftable="false" location="${blue_wool_coords}">
+            <monument>
+                <block>24.5,57,108.5</block>
+            </monument>
+        </wool>
+    </wools>
+
+    <filters>
+        <deny id="only_red">
+            <team>blue</team>
+        </deny>
+        <deny id="only_blue">
+            <team>red</team>
+        </deny>
+        <any id="all_arena_renewables">
+            <any id="arena_renewables1">
+                <material id="only_leaves">leaves</material>
+                <material id="only_oak">log:12</material>
+                <material id="only_gold_ore">gold ore</material>
+                <material id="only_light_gray_carpet">carpet:8</material>
+            </any>
+            <any id="arena_renewables2">
+                <material id="only_water">stationary water</material>
+                <material id="only_iron_block">iron block</material>
+                <material id="only_redstone_block">redstone block</material>
+            </any>
+        </any>
+        <all id="ship_renewables">
+            <any>
+                <region id="red_ship" />
+                <region id="blue_ship" />
+            </any>
+            <any>
+                <material id="only_iron_ore">iron ore</material>
+                <filter id="only_oak" />
+            </any>
+        </all>
+        <time id="rushing_blocked">${rushing_cooldown}</time>
+        <all id="renewables_outside_arena_or_ship">
+            <not>
+                <any>
+                    <region id="arena" />
+                    <region id="red_ship" />
+                    <region id="blue_ship" />
+                </any>
+            </not>
+            <any>
+                <filter id="all_arena_renewables" />
+                <filter id="only_iron_ore" />
+            </any>
+        </all>
+        <all id="only_iron_ore_on_ship">
+            <any>
+                <region id="red_ship" />
+                <region id="blue_ship" />
+            </any>
+            <filter id="only_iron_ore" />
+        </all>
+        <any id="only_red_and_blue_wool">
+            <material>wool:14</material>
+            <material>wool:11</material>
+        </any>
+        <not id="not_player">
+            <cause>player</cause>
+        </not>
+        <not id="not_defender">
+            <class>Defender</class>
+        </not>
+        <all id="red_jump_pad_access">
+            <team>red</team>
+            <filter id="not_defender" />
+        </all>
+        <all id="blue_jump_pad_access">
+            <team>blue</team>
+            <filter id="not_defender" />
+        </all>
+        <deny id="deny_not_arena_renewables">
+            <all>
+                <class>Resource Gatherer</class>
+                <not>
+                    <filter id="all_arena_renewables" />
+                </not>
+            </all>
+        </deny>
+        <deny id="deny_not_gatherers">
+            <all>
+                <filter id="all_arena_renewables" />
+                <not>
+                    <class>Resource Gatherer</class>
+                </not>
+            </all>
+        </deny>
+        <deny id="deny_defenders">
+            <class>Defender</class>
+        </deny>
+        <countdown duration="${rushing_cooldown}" message="Rushing enabled in {0}">
+            <all>
+                <match-running />
+                <not>
+                    <filter id="rushing_blocked" />
+                </not>
+            </all>
+        </countdown>
+        <deny id="deny_void">
+            <void />
+        </deny>
+        <any id="only_anti_glitch_blocks">
+            <material>stone button</material>
+            <material>wood button</material>
+            <material>sign</material>
+            <material>wall sign</material>
+        </any>
+        <pulse id="pulse_filter" period="1s" duration="0.5s">
+            <match-running />
+        </pulse>
+        <all id="only_full_invis">
+            <effect>invisibility</effect>
+            <deny>
+                <any>
+                    <wearing ignore-durability="true" ignore-metadata="true" ignore-name="true" ignore-enchantments="true">
+                        <item material="iron helmet" />
+                    </wearing>
+                    <wearing ignore-durability="true" ignore-metadata="true" ignore-name="true" ignore-enchantments="true">
+                        <item material="iron chestplate" />
+                    </wearing>
+                    <wearing ignore-durability="true" ignore-metadata="true" ignore-name="true" ignore-enchantments="true">
+                        <item material="iron leggings" />
+                    </wearing>
+                    <wearing ignore-durability="true" ignore-metadata="true" ignore-name="true" ignore-enchantments="true">
+                        <item material="iron boots" />
+                    </wearing>
+                    <wearing ignore-durability="true" ignore-metadata="true" ignore-name="true" ignore-enchantments="true">
+                        <item material="leather helmet" />
+                    </wearing>
+                    <wearing ignore-durability="true" ignore-metadata="true" ignore-name="true" ignore-enchantments="true">
+                        <item material="leather chestplate" />
+                    </wearing>
+                    <wearing ignore-durability="true" ignore-metadata="true" ignore-name="true" ignore-enchantments="true">
+                        <item material="leather leggings" />
+                    </wearing>
+                    <wearing ignore-durability="true" ignore-metadata="true" ignore-name="true" ignore-enchantments="true">
+                        <item material="leather boots" />
+                    </wearing>
+                    <wearing ignore-durability="true" ignore-metadata="true" ignore-name="true" ignore-enchantments="true">
+                        <item material="chainmail helmet" />
+                    </wearing>
+                    <wearing ignore-durability="true" ignore-metadata="true" ignore-name="true" ignore-enchantments="true">
+                        <item material="chainmail chestplate" />
+                    </wearing>
+                    <wearing ignore-durability="true" ignore-metadata="true" ignore-name="true" ignore-enchantments="true">
+                        <item material="chainmail chestplate" />
+                    </wearing>
+                    <wearing ignore-durability="true" ignore-metadata="true" ignore-name="true" ignore-enchantments="true">
+                        <item material="chainmail leggings" />
+                    </wearing>
+                    <wearing ignore-durability="true" ignore-metadata="true" ignore-name="true" ignore-enchantments="true">
+                        <item material="chainmail boots" />
+                    </wearing>
+                    <wearing ignore-durability="true" ignore-metadata="true" ignore-name="true" ignore-enchantments="true">
+                        <item material="skull item" />
+                    </wearing>
+                </any>
+            </deny>
+        </all>
+        <all id="only_invis_resistance">
+            <deny>
+                <effect>invisibility</effect>
+            </deny>
+            <effect amplifier="1">resistance</effect>
+        </all>
+        <deny id="deny_anvils">
+            <material>anvil</material>
+        </deny>
+        <material id="only_tnt">tnt</material>
+        <all id="stopped_using_jump_pad">
+            <variable var="is_using_jump_pad">1</variable>
+            <grounded />
+        </all>
+        <any id="only_terrain_blocks">
+            <material>stone:6</material>
+            <material>stone:5</material>
+            <material>wool:8</material>
+            <material>stained clay:8</material>
+            <material>stained clay:4</material>
+        </any>
+        <after id="all_iron_broken_delay" duration="${iron_redstone_renewables_interval}">
+            <variable id="all_iron_broken" var="iron_blocks_broken_count">152</variable>
+        </after>
+        <after id="all_redstone_broken_delay" duration="${iron_redstone_renewables_interval}">
+            <variable id="all_redstone_broken" var="redstone_blocks_broken_count">152</variable>
+        </after>
+    </filters>
+
+    <regions>
+        <union id="red_spawns">
+            <point id="red_spawn1">-45.5,61,-154.5</point>
+            <point id="red_spawn2">46.5,61,-154.5</point>
+        </union>
+        <union id="blue_spawns">
+            <point id="blue_spawn1">46.5,61,87.5</point>
+            <point id="blue_spawn2">-45.5,61,87.5</point>
+        </union>
+        <point id="observers_spawn">-123.5,190,-33.5</point>
+        <union id="red_spawns_regions">
+            <rectangle id="red_spawn1_region" min="41.5,-163.5" max="51.5,-149.5" />
+            <rectangle id="red_spawn2_region" min="-50.5,-163.5" max="-40.5,-149.5" />
+        </union>
+        <union id="blue_spawns_regions">
+            <rectangle id="blue_spawn1_region" min="-40.5,96.5" max="-50.5,82.5" />
+            <rectangle id="blue_spawn2_region" min="51.5,82.5" max="41.5,96.5" />
+        </union>
+        <complement id="playable_area">
+            <rectangle min="83.5,-217.5" max="-82.5,150.5" />
+            <rectangle min="-82.5,150.5" max="-19.5,97.5" />
+            <rectangle min="84.5,150.5" max="40.5,97.5" />
+            <rectangle min="84.5,-217.5" max="20.5,-164.5" />
+            <rectangle min="-83.5,-217.5" max="-39.5,-164.5" />
+            <rectangle min="-83.5,-164.5" max="-51.5,-149.5" />
+            <rectangle min="52.5,-164.5" max="84.5,-149.5" />
+            <rectangle min="52.5,82.5" max="84.5,96.5" />
+            <rectangle min="-82.5,82.5" max="-51.5,96.5" />
+        </complement>
+        <rectangle id="red_wool_room" min="-6.5,136.5" max="7.5,116.5" />
+        <rectangle id="blue_wool_room" min="7.5,-203.5" max="-6.5,-183.5" />
+        <point id="red_wool_location">${red_wool_coords}</point>
+        <point id="blue_wool_location">${blue_wool_coords}</point>
+
+        <union id="jump_pads">
+            <cuboid id="red_jump_pad1" min="-56.5,59,-130.5" max="-54.5,60,-128.5" />
+            <cuboid id="red_jump_pad1_boost1" min="-56.5,100,-130.5" max="-54.5,120,-128.5" />
+            <cuboid id="red_jump_pad1_boost2" min="-56.5,130,-130.5" max="-54.5,160,-128.5" />
+            <cuboid id="red_jump_pad1_boost3" min="-48.5,175,-90.5" max="-54.5,200,-98.5" />
+            <cuboid id="red_jump_pad2" min="55.5,59,-130.5" max="57.5,120,-128.5" />
+            <cuboid id="red_jump_pad2_boost1" min="55.5,100,-130.5" max="57.5,120,-128.5" />
+            <cuboid id="red_jump_pad2_boost2" min="55.5,130,-130.5" max="57.5,160,-128.5" />
+            <cuboid id="red_jump_pad2_boost3" min="50.5,175,-96.5" max="62.5,200,-98.5" />
+            <cuboid id="red_jump_pad3" min="-24.5,64,-153.5" max="-22.5,65,-151.5" />
+            <cuboid id="red_jump_pad3_boost1" min="-24.5,100,-153.5" max="-22.5,120,-151.5" />
+            <cuboid id="red_jump_pad3_boost2" min="-24.5,130,-153.5" max="-22.5,160,-151.5" />
+            <cuboid id="red_jump_pad3_boost3" min="-16.5,175,-119.5" max="-22.5,200,-121.5" />
+            <cuboid id="red_jump_pad3_boost4" min="-16.5,172,-95.5" max="-22.5,200,-100.5" />
+            <cuboid id="red_jump_pad4" min="-24.5,57,-208.5" max="-22.5,58,-207.5" />
+            <cuboid id="red_jump_pad4_boost" min="-24.5,68,-208.5" max="-22.5,66,-206.5" />
+
+            <cuboid id="blue_jump_pad1" min="57.5,59,63.5" max="55.5,60,61.5" />
+            <cuboid id="blue_jump_pad1_boost1" min="57.5,100,63.5" max="55.5,120,61.5" />
+            <cuboid id="blue_jump_pad1_boost2" min="57.5,130,63.5" max="55.5,160,61.5" />
+            <cuboid id="blue_jump_pad1_boost3" min="65.5,175,27.5" max="48.5,200,31.5" />
+            <cuboid id="blue_jump_pad2" min="-54.5,59,63.5" max="-56.5,120,61.5" />
+            <cuboid id="blue_jump_pad2_boost1" min="-54.5,100,63.5" max="-56.5,120,61.5" />
+            <cuboid id="blue_jump_pad2_boost2" min="-54.5,130,63.5" max="-56.5,160,61.5" />
+            <cuboid id="blue_jump_pad2_boost3" min="-52.5,175,39.5" max="-65.5,200,25.5" />
+            <cuboid id="blue_jump_pad3" min="25.5,64,86.5" max="23.5,65,84.5" />
+            <cuboid id="blue_jump_pad3_boost1" min="25.5,100,86.5" max="23.5,120,84.5" />
+            <cuboid id="blue_jump_pad3_boost2" min="25.5,130,86.5" max="23.5,160,84.5" />
+            <cuboid id="blue_jump_pad3_boost3" min="17.5,175,45.5" max="23.5,200,54.5" />
+            <cuboid id="blue_jump_pad3_boost4" min="17.5,172,29.5" max="23.5,200,33.5" />
+            <cuboid id="blue_jump_pad4" min="23.5,57,140.5" max="25.5,58,141.5" />
+            <cuboid id="blue_jump_pad4_boost" min="23.5,66,139.5" max="27.5,68,141.5" />
+        </union>
+
+        <union id="jump_pad_rectangles">
+            <union id="red_jump_pads_rectangles">
+                <complement id="red_jump_pad1_rectangle">
+                    <rectangle min="-56.5,-130.5" max="-54.5,-128.5" />
+                    <below y="49" />
+                </complement>
+                <complement id="red_jump_pad2_rectangle">
+                    <rectangle min="55.5,-130.5" max="57.5,-128.5" />
+                    <below y="49" />
+                </complement>
+                <complement id="red_jump_pad3_rectangle">
+                    <rectangle min="-24.5,-153.5" max="-22.5,-151.5" />
+                    <below y="64" />
+                </complement>
+            </union>
+            <union id="blue_jump_pads_rectangles">
+                <complement id="blue_jump_pad1_rectangle">
+                    <rectangle min="57.5,63.5" max="55.5,61.5" />
+                    <below y="49" />
+                </complement>
+                <complement id="blue_jump_pad2_rectangle">
+                    <rectangle min="-54.5,63.5" max="-56.5,61.5" />
+                    <below y="49" />
+                </complement>
+                <complement id="blue_jump_pad3_rectangle">
+                    <rectangle min="25.5,86.5" max="23.5,84.5" />
+                    <below y="64" />
+                </complement>
+            </union>
+        </union>
+
+        <cuboid id="red_arena_exit" min="-1.5,167,-77.5" max="2.5,172,-69.5" />
+        <cuboid id="blue_arena_exit" min="-1.5,172,2.5" max="2.5,167,10.5" />
+
+        <!-- <cuboid id="arena_landing_platform1" min="-32.5,167,-66.5" max="-24.5,175,-58.5" />
+        <cuboid id="arena_landing_platform2" min="33.5,167,-66.5" max="25.5,175,-58.5" />
+        <cuboid id="arena_landing_platform3" min="25.5,175,-8.5" max="33.5,167,-0.5" />
+        <cuboid id="arena_landing_platform4" min="-24.5,175,-8.5" max="-32.5,167,-0.5" /> -->
+
+        <cuboid id="arena" min="-33.5,162,-77.5" max="35.5,186,10.5" />
+        <cuboid id="middle_area" min="-83.5,0,-54.5" max="84.5,126,-12.5" />
+        <union id="ships">
+            <rectangle id="red_ship" min="-14.5,-146.5" max="-32.5,-217.5" />
+            <rectangle id="blue_ship" min="15.5,79.5" max="33.5,150.5" />
+        </union>
+        <above id="build_limit" y="${build_limit_height}" />
+        <below id="lower_build_limit" y="${lower_build_limit}" />
+        <below id="void" y="${void_height}" />
+        <point id="deep_void">0.5,-197,-33.5</point>
+        <cuboid id="red_arena_exit_teleport" min="-2.5,150,-87.5" max="3.5,155,-72.5" />
+        <cuboid id="blue_arena_exit_teleport" min="-2.5,150,5.5" max="3.5,155,20.5" />
+        <cylinder id="arena_void" base="0.5,150,-33.5" radius="50" height="3" />
+        <union id="ships_spaces">
+            <rectangle id="red_ship_space1" min="-39.5,-217.5" max="-7.5,-145.5" />
+            <rectangle id="red_ship_space2" min="8.5,-217.5" max="40.5,-145.5" />
+            <rectangle id="blue_ship_space1" min="8.5,78.5" max="40.5,150.5" />
+            <rectangle id="blue_ship_space2" min="-39.5,78.5" max="-7.5,150.5" />
+        </union>
+
+        <!-- <union id="islands">
+            <rectangle id="red_island" min="-50.5,-217.5" max="52.5,-129.5" />
+            <rectangle id="blue_island" min="-50.5,-62.5" max="51.5,62.5" />
+        </union> -->
+
+        <union id="arena_iron_blocks">
+            <union>
+                <cuboid min="-21.5,167,-55.5" max="-16.5,169,-50.5" />
+                <cuboid min="-17.5,169,-50.5" max="-19.5,170,-54.5" />
+                <cuboid min="-16.5,169,-51.5" max="-20.5,170,-53.5" />
+                <cuboid min="-18.5,170,-51.5" max="-18.5,171,-53.5" />
+                <cuboid min="-17.5,170,-52.5" max="-19.5,171,-52.5" />
+            </union>
+            <union>
+                <cuboid min="22.5,167,-12.5" max="17.5,169,-16.5" />
+                <cuboid min="20.5,169,-12.5" max="18.5,170,-16.5" />
+                <cuboid min="21.5,169,-13.5" max="17.5,170,-15.5" />
+                <cuboid min="20.5,170,-14.5" max="18.5,171,-14.5" />
+                <cuboid min="19.5,170,-13.5" max="19.5,171,-15.5" />
+            </union>
+        </union>
+        <union id="arena_redstone_blocks">
+            <union>
+                <cuboid min="-16.5,167,-12.5" max="-21.5,169,-16.5" />
+                <cuboid min="-17.5,169,-12.5" max="-19.5,170,-16.5" />
+                <cuboid min="-16.5,169,-13.5" max="-20.5,170,-15.5" />
+                <cuboid min="-18.5,170,-13.5" max="-18.5,171,-15.5" />
+                <cuboid min="-17.5,170,-14.5" max="-19.5,171,-14.5" />
+            </union>
+            <union>
+                <cuboid min="17.5,167,-55.5" max="22.5,169,-50.5" />
+                <cuboid min="17.5,169,-53.5" max="21.5,170,-51.5" />
+                <cuboid min="18.5,169,-54.5" max="20.5,170,-50.5" />
+                <cuboid min="19.5,170,-53.5" max="19.5,171,-51.5" />
+                <cuboid min="18.5,170,-52.5" max="20.5,171,-52.5" />
+            </union>
+        </union>
+        <union id="arena_leaves">
+            <cuboid min="27.5,167,-28.5" max="29.5,169,-26.5" />
+            <cuboid min="-28.5,167,-40.5" max="-26.5,169,-38.5" />
+        </union>
+        <union id="arena_oak_logs">
+            <cuboid min="-29.5,167,-29.5" max="-26.5,169,-26.5" />
+            <cuboid min="27.5,167,-40.5" max="30.5,169,-41.5" />
+        </union>
+
+        <apply region="red_spawns_regions" enter="only_red" message="${no_enemy_spawn_access}" />
+        <apply region="red_spawns_regions" block="never" />
+        <apply region="blue_spawns_regions" enter="only_blue" message="${no_enemy_spawn_access}" />
+        <apply region="blue_spawns_regions" block="never" />
+        <apply region="red_wool_room" enter="only_red" message="${no_wool_room_access}" />
+        <apply region="red_wool_room" block="never" />
+        <apply region="blue_wool_room" enter="only_blue" message="${no_wool_room_access}" />
+        <apply region="blue_wool_room" block="never" />
+        <apply region="playable_area" leave="never" message="${no_playable_area_leave_access}" />
+        <apply block="never">
+            <region>
+                <negative>
+                    <region id="playable_area" />
+                </negative>
+            </region>
+        </apply>
+        <apply region="red_arena_exit" enter="only_red" message="${no_enemy_exit_access}" />
+        <apply region="blue_arena_exit" enter="only_blue" message="${no_enemy_exit_access}" />
+
+        <apply region="red_jump_pads_rectangles" enter="only_red" message="${no_enemies_jump_pad_access}" />
+        <apply region="red_jump_pads_rectangles" enter="deny_defenders" message="${no_defenders_jump_pad_access}" />
+        <apply region="red_jump_pads_rectangles" block-place="never" block-break="never" />
+
+        <apply region="red_jump_pad1" velocity="0,5,0" />
+        <apply region="red_jump_pad1_boost1" velocity="0,5,0" />
+        <apply region="red_jump_pad1_boost2" velocity="0.5,5,100" />
+        <apply region="red_jump_pad1_boost3" velocity="2.5,0.1,4" />
+        <apply region="red_jump_pad2" velocity="0,5,0" />
+        <apply region="red_jump_pad2_boost1" velocity="0,5,0" />
+        <apply region="red_jump_pad2_boost2" velocity="0.5,5,100" />
+        <apply region="red_jump_pad2_boost3" velocity="-3.5,0.1,4" />
+        <apply region="red_jump_pad3" velocity="0,5,0" />
+        <apply region="red_jump_pad3_boost1" velocity="0,5,0" />
+        <apply region="red_jump_pad3_boost2" velocity="0.5,5,100" />
+        <apply region="red_jump_pad3_boost3" velocity="0,0.5,10" />
+        <apply region="red_jump_pad3_boost4" velocity="-1,0,5" />
+        <apply region="red_jump_pad4" velocity="0,2,0" />
+        <apply region="red_jump_pad4_boost" velocity="0,0,1.5" />
+
+        <apply region="blue_jump_pads_rectangles" enter="only_blue" message="${no_enemies_jump_pad_access}" />
+        <apply region="blue_jump_pads_rectangles" enter="deny_defenders" message="${no_defenders_jump_pad_access}" />
+        <apply region="blue_jump_pads_rectangles" block-place="never" block-break="never" />
+
+        <apply region="blue_jump_pad1" velocity="0,5,0" />
+        <apply region="blue_jump_pad1_boost1" velocity="0,5,0" />
+        <apply region="blue_jump_pad1_boost2" velocity="-0.5,5,-100" />
+        <apply region="blue_jump_pad1_boost3" velocity="-2.5,0.1,-4" />
+        <apply region="blue_jump_pad2" velocity="0,5,0" />
+        <apply region="blue_jump_pad2_boost1" velocity="0,5,0" />
+        <apply region="blue_jump_pad2_boost2" velocity="-0.5,5,-100" />
+        <apply region="blue_jump_pad2_boost3" velocity="3.5,0.1,-4" />
+        <apply region="blue_jump_pad3" velocity="0,5,0" />
+        <apply region="blue_jump_pad3_boost1" velocity="0,5,0" />
+        <apply region="blue_jump_pad3_boost2" velocity="-0.5,5,-100" />
+        <apply region="blue_jump_pad3_boost3" velocity="-0,0.5,-10" />
+        <apply region="blue_jump_pad3_boost4" velocity="1,0,-5" />
+        <apply region="blue_jump_pad4" velocity="0,2,0" />
+        <apply region="blue_jump_pad4_boost" velocity="0,0,-1.5" />
+
+        <apply region="arena" block-place="not_player" block-physics="never" message="${no_build_at_arena_access}" />
+        <apply region="arena" block-break="deny_not_gatherers" message="${only_gatherers}" />
+        <apply region="arena" block-break="deny_not_arena_renewables" message="${only_renewables}" />
+        <apply region="arena" block-break="all_arena_renewables" />
+        <apply region="middle_area" enter="rushing_blocked" block="rushing_blocked" message="${rush_disabled}" />
+        <apply region="ships" block-place="not_player" block-break="ship_renewables" block-physics="never" />
+        <apply region="build_limit" block-place="not_player" message="${over_build_limit_height}" />
+        <apply region="lower_build_limit" block="never" message="${below_build_limit}" />
+        <apply region="ships_spaces" block-place="only_anti_glitch_blocks" message="${no_building_over_void}" />
+        <apply region="ships_spaces" block-break="only_anti_glitch_blocks" message="${no_block_break_access}" />
+        <apply region="everywhere" use="deny_anvils" message="${no_anvil_access}" />
+    </regions>
+
+    <kits>
+        <kit id="spawn_speed">
+            <effect duration="3" amplifier="4">speed</effect>
+        </kit>
+        <kit id="shop_endermite_eggs" deduct-items="false" deduct-tools="false" repair-tools="false" drop-overflow="true">
+            <item material="monster egg" damage="67" amount="4" />
+            <overflow-warning>{translatable:shop.purchase.overflow}</overflow-warning>
+        </kit>
+        <kit id="shop_iron_boots">
+            <item material="iron boots" unbreakable="true">
+                <enchantment level="2">projectile_protection</enchantment>
+            </item>
+        </kit>
+        <kit id="shop_iron_leggings">
+            <item material="iron leggings" unbreakable="true">
+                <enchantment level="2">projectile_protection</enchantment>
+            </item>
+        </kit>
+        <kit id="shop_iron_chestplate">
+            <item material="iron chestplate" unbreakable="true">
+                <enchantment level="2">projectile_protection</enchantment>
+            </item>
+        </kit>
+        <kit id="shop_iron_helmet">
+            <item material="iron helmet" unbreakable="true">
+                <enchantment level="2">projectile_protection</enchantment>
+            </item>
+        </kit>
+        <kit id="shop_bow">
+            <item material="bow" unbreakable="true" prevent-sharing="true">
+                <enchantment level="1">infinity</enchantment>
+                <enchantment level="1">power</enchantment>
+            </item>
+        </kit>
+        <kit id="kill_effects">
+            <effect duration="6" amplifier="1">regeneration</effect>
+            <effect duration="3" amplifier="1">speed</effect>
+        </kit>
+        <kit id="invis_resistance" filter="only_full_invis">
+            <effect duration="oo" amplifier="1">resistance</effect>
+        </kit>
+        <kit id="take_invis_resistance" filter="only_invis_resistance">
+            <effect duration="oo" amplifier="1">resistance</effect>
+        </kit>
+        <give kit="invis_resistance" filter="pulse_filter" />
+        <take kit="take_invis_resistance" filter="pulse_filter" />
+    </kits>
+
+    <spawns>
+        <spawn team="red" kit="spawn_speed">
+            <regions>
+                <region id="red_spawn1" />
+                <region id="red_spawn2" />
+            </regions>
+        </spawn>
+        <spawn team="blue" kit="spawn_speed">
+            <regions>
+                <region id="blue_spawn1" yaw="-180" />
+                <region id="blue_spawn2" yaw="-180" />
+            </regions>
+        </spawn>
+        <default>
+            <regions>
+                <region id="observers_spawn" yaw="-90" />
+            </regions>
+        </default>
+    </spawns>
+
+    <actions>
+        <action id="play_explode_sound" scope="player">
+            <sound key="random.explode" />
+            <set var="is_using_jump_pad" value="1" />
+        </action>
+        <action id="replace_clay" scope="player">
+            <replace-item keep-amount="true">
+                <find material="stained clay" />
+                <replace material="stained clay" team-color="true" />
+            </replace-item>
+        </action>
+        <action id="not_using_jump_pad" filter="stopped_using_jump_pad" scope="player">
+            <set var="is_using_jump_pad" value="0" />
+        </action>
+
+        <action id="refill_iron" scope="match">
+            <set var="iron_blocks_broken_count" value="0" />
+            <fill material="iron block">
+                <region id="arena_iron_blocks" />
+            </fill>
+            <message text="`7`l[`e`lAlert`7`l] `cAll `f`liron `cblocks got renewed! `b`oGo mine them" />
+        </action>
+        <action id="announce_iron_mined" scope="match">
+            <message text="`7`l[`e`lAlert`7`l] `cAll `f`liron `cblocks at the arena got mined! `b`oThey will renew in `e${iron_redstone_renewables_interval}" />
+        </action>
+        <action id="refill_redstone" scope="match">
+            <set var="redstone_blocks_broken_count" value="0" />
+            <fill material="redstone block">
+                <region id="arena_redstone_blocks" />
+            </fill>
+            <message text="`7`l[`e`lAlert`7`l] `cAll `4`lredstone `cblocks got renewed! `b`oGo mine them" />
+        </action>
+        <action id="announce_redstone_mined" scope="match">
+            <message text="`7`l[`e`lAlert`7`l] `cAll `4`lredstone `cblocks at the arena got mined! `b`oThey will renew in `e${iron_redstone_renewables_interval}" />
+        </action>
+
+        <trigger filter="jump_pads" action="play_explode_sound" scope="player" />
+        <trigger filter="pulse_filter" action="replace_clay" scope="player" />
+        <trigger filter="pulse_filter" action="not_using_jump_pad" scope="player" />
+        <trigger filter="all_iron_broken_delay" action="refill_iron" scope="match" />
+        <trigger filter="all_iron_broken" action="announce_iron_mined" scope="match" />
+        <trigger filter="all_redstone_broken_delay" action="refill_redstone" scope="match" />
+        <trigger filter="all_redstone_broken" action="announce_redstone_mined" scope="match" />
+    </actions>
+
+    <damage>
+        <deny>
+            <all>
+                <cause>fall</cause>
+                <any>
+                    <variable var="is_using_jump_pad">1</variable>
+                    <region id="ships" />
+                </any>
+            </all>
+        </deny>
+        <deny>
+            <all>
+                <any>
+                    <region id="red_spawn1_region" />
+                    <region id="red_spawn2_region" />
+                    <region id="blue_spawn1_region" />
+                    <region id="blue_spawn2_region" />
+                </any>
+                <relation>enemy</relation>
+            </all>
+        </deny>
+    </damage>
+
+    <renewables>
+        <renewable region="arena" renew-filter="arena_renewables1" interval="${arena_renewables_interval}" grow="false" />
+        <renewable region="arena" interval="${water_renewable_interval}" grow="false">
+            <renew-filter>
+                <any>
+                    <filter id="only_light_gray_carpet" />
+                    <filter id="only_water" />
+                </any>
+            </renew-filter>
+        </renewable>
+        <renewable renew-filter="ship_renewables" interval="${ship_renewables_interval}" grow="false" />
+    </renewables>
+
+    <kill-rewards>
+        <kill-reward>
+            <filter>
+                <class>Attacker</class>
+            </filter>
+            <item material="prismarine crystals" amount="1" />
+            <kit id="kill_effects" />
+        </kill-reward>
+        <kill-reward>
+            <filter>
+                <all>
+                    <region id="arena" />
+                    <class>Attacker</class>
+                    <kill-streak count="5" repeat="true" />
+                </all>
+            </filter>
+            <item material="prismarine crystals" amount="5" />
+            <kit id="kill_effects" />
+        </kill-reward>
+    </kill-rewards>
+
+    <itemkeep>
+        <item>prismarine crystals</item>
+    </itemkeep>
+    <itemremove>
+        <item>iron helmet</item>
+        <item>iron chestplate</item>
+        <item>iron leggings</item>
+        <item>iron boots</item>
+        <item>leather helmet</item>
+        <item>leather chestplate</item>
+        <item>leather leggings</item>
+        <item>leather boots</item>
+        <item>chainmail helmet</item>
+        <item>chainmail chestplate</item>
+        <item>chainmail chestplate</item>
+        <item>chainmail leggings</item>
+        <item>chainmail boots</item>
+        <item>skull item</item>
+        <item>iron sword</item>
+        <item>stone sword</item>
+        <item>shears</item>
+        <item>iron pickaxe</item>
+        <item>iron axe</item>
+        <item>stone axe</item>
+        <item>stick</item>
+        <item>arrow</item>
+    </itemremove>
+
+    <shops>
+        <shop id="attackers_shop" name="Attackers shop">
+            <category id="potions" name="`dPotions" material="potion">
+                <item material="potion" damage="11" name="`aDrinkable Jump Boost III `o30s `r`a`lx1" amount="1">
+                    <effect duration="30s" amplifier="3">jump_boost</effect>
+                    <payment currency="prismarine crystals" price="5" color="dark aqua" />
+                </item>
+                <item material="potion" damage="8" name="`eDrinkable Haste III `o15s `r`e`lx1" amount="1">
+                    <effect duration="15s" amplifier="3">fast_digging</effect>
+                    <payment currency="prismarine crystals" price="3" color="dark aqua" />
+                </item>
+                <item material="potion" damage="9" name="`cDrinkable Strength I `o30s `r`c`lx1" amount="1">
+                    <effect duration="30s" amplifier="1">strength</effect>
+                    <payment currency="prismarine crystals" price="4" color="dark aqua" />
+                </item>
+                <item material="potion" damage="14" name="`7Drinkable Invisibility `o8s `r`7`lx1" amount="1">
+                    <effect duration="8s" amplifier="1">invisibility</effect>
+                    <payment currency="prismarine crystals" price="15" color="dark aqua" />
+                </item>
+                <item material="potion" damage="16386" name="`bSplashable Speed II `o1m `r`b`lx1" amount="1">
+                    <effect duration="1m" amplifier="2">speed</effect>
+                    <payment currency="prismarine crystals" price="8" color="dark aqua" />
+                </item>
+                <item material="potion" damage="16387" name="`6Splashable Fire Resistance `o2m `r`6`lx1" amount="1">
+                    <effect duration="2m" amplifier="1">fire_resistance</effect>
+                    <payment currency="prismarine crystals" price="2" color="dark aqua" />
+                </item>
+            </category>
+            <category id="other" name="`7Other" material="bedrock">
+                <item material="sponge" name="`eSponge `lx2" amount="2">
+                    <payment currency="prismarine crystals" price="2" color="dark aqua" />
+                </item>
+                <item material="monster egg" damage="67" name="`dEndermite Egg `lx4" amount="4" kit="shop_endermite_eggs">
+                    <payment currency="prismarine crystals" price="4" color="dark aqua" />
+                </item>
+            </category>
+            <category id="enchants" name="`dEnchants" material="enchanted book">
+                <item material="bow" name="`dPower I bow `lx1" amount="1" kit="shop_bow">
+                    <payment currency="prismarine crystals" price="20" color="dark aqua" />
+                    <payment currency="bow" price="1" color="gray" />
+                </item>
+                <item material="iron helmet" name="`dProjectile protection II helmet `lx1" amount="1" kit="shop_iron_helmet">
+                    <payment currency="prismarine crystals" price="5" color="dark aqua" />
+                    <payment currency="iron helmet" price="1" color="gray" />
+                </item>
+                <item material="iron chestplate" name="`dProjectile protection II chestplate `lx1" amount="1" kit="shop_iron_chestplate">
+                    <payment currency="prismarine crystals" price="10" color="dark aqua" />
+                    <payment currency="iron chestplate" price="1" color="gray" />
+                </item>
+                <item material="iron leggings" name="`dProjectile protection II leggings `lx1" amount="1" kit="shop_iron_leggings">
+                    <payment currency="prismarine crystals" price="10" color="dark aqua" />
+                    <payment currency="iron leggings" price="1" color="gray" />
+                </item>
+                <item material="iron boots" name="`dProjectile protection II boots `lx1" amount="1" kit="shop_iron_boots">
+                    <payment currency="prismarine crystals" price="5" color="dark aqua" />
+                    <payment currency="iron boots" price="1" color="gray" />
+                </item>
+            </category>
+        </shop>
+    </shops>
+
+    <shopkeepers>
+        <shopkeeper mob="Villager" shop="attackers_shop" name="`c`lStore">
+            <point yaw="-180" pitch="0">-23.5,56,-151.5</point>
+        </shopkeeper>
+        <shopkeeper mob="Villager" shop="attackers_shop" name="`9`lStore">
+            <point yaw="0" pitch="0">24.5,56,84.5</point>
+        </shopkeeper>
+    </shopkeepers>
+
+    <block-drops>
+        <rule filter="renewables_outside_arena_or_ship" region="everywhere" />
+        <rule filter="only_gold_ore" region="arena">
+            <drops>
+                <item material="gold ingot" amount="2" />
+            </drops>
+        </rule>
+        <rule filter="only_iron_ore_on_ship">
+            <drops>
+                <item material="iron ingot" amount="2" />
+            </drops>
+        </rule>
+        <rule filter="only_leaves" region="arena">
+            <drops>
+                <item material="apple" amount="1" chance="0.25" />
+            </drops>
+        </rule>
+        <rule filter="only_red_and_blue_wool" region="everywhere" />
+        <rule filter="only_tnt" region="everywhere" />
+        <rule filter="only_terrain_blocks" region="everywhere">
+            <drops>
+                <item material="cobblestone" amount="1" />
+            </drops>
+        </rule>
+        <rule region="arena_iron_blocks">
+            <drops>
+                <item material="iron ingot" amount="5" />
+            </drops>
+            <kit>
+                <action scope="player">
+                    <switch-scope outer="player" inner="match">
+                        <set var="iron_blocks_broken_count" value="iron_blocks_broken_count+1" />
+                    </switch-scope>
+                </action>
+            </kit>
+        </rule>
+        <rule region="arena_redstone_blocks">
+            <drops>
+                <item material="redstone" amount="3" />
+            </drops>
+            <kit>
+                <action scope="player">
+                    <switch-scope outer="player" inner="match">
+                        <set var="redstone_blocks_broken_count" value="redstone_blocks_broken_count+1" />
+                    </switch-scope>
+                </action>
+            </kit>
+        </rule>
+    </block-drops>
+
+    <portals>
+        <portal region="red_arena_exit_teleport" destination="red_spawn1" yaw="@0" pitch="@0" />
+        <portal region="blue_arena_exit_teleport" destination="blue_spawn1" yaw="@-180" pitch="@0" />
+        <portal region="arena_void" destination="deep_void" pitch="@90" sound="false" />
+        <portal region="void" destination="deep_void" pitch="@90" sound="false" />
+    </portals>
+
+    <crafting>
+        <disable>bow</disable>
+    </crafting>
+
+    <spawners>
+        <spawner spawn-region="red_wool_location" player-region="red_wool_room" delay="5" max-entities="15">
+            <item material="wool" damage="14" amount="1" />
+        </spawner>
+        <spawner spawn-region="blue_wool_location" player-region="blue_wool_room" delay="5" max-entities="15">
+            <item material="wool" damage="3" amount="1" />
+        </spawner>
+    </spawners>
+
+    <classes family="all">
+        <class name="Attacker" description="${attacker_description}" icon="stone sword">
+            <kit>
+                <helmet material="iron helmet" unbreakable="true" />
+                <chestplate material="chainmail chestplate" team-color="true" unbreakable="true" />
+                <leggings material="chainmail leggings" team-color="true" unbreakable="true" />
+                <boots material="iron boots" unbreakable="true" />
+                <item material="stone sword" amount="1" slot="0" unbreakable="true" prevent-sharing="true">
+                    <enchantment level="1">sharpness</enchantment>
+                </item>
+                <item material="stained clay" amount="64" slot="1" team-color="true" />
+                <item material="stained glass" amount="64" slot="8" team-color="true" />
+                <item material="iron pickaxe" amount="1" slot="2" unbreakable="true" prevent-sharing="true" />
+                <item material="stone axe" amount="1" slot="3" unbreakable="true" prevent-sharing="true" />
+                <item material="shears" amount="1" slot="7" unbreakable="true" prevent-sharing="true" />
+                <item material="bow" amount="1" slot="4" unbreakable="true" prevent-sharing="true">
+                    <enchantment>infinity</enchantment>
+                </item>
+                <item material="arrow" amount="1" slot="17" />
+            </kit>
+        </class>
+        <class name="Defender" description="${defender_description}" icon="workbench" default="true">
+            <kit>
+                <helmet material="leather helmet" team-color="true" unbreakable="true">
+                    <enchantment>aqua_affinity</enchantment>
+                </helmet>
+                <chestplate material="chainmail chestplate" unbreakable="true" />
+                <leggings material="chainmail leggings" unbreakable="true" />
+                <boots material="leather boots" team-color="true" unbreakable="true">
+                    <enchantment>aqua_affinity</enchantment>
+                </boots>
+                <item material="iron sword" amount="1" slot="0" unbreakable="true" prevent-sharing="true" />
+                <item material="stained clay" amount="64" slot="1" team-color="true" />
+                <item material="stained glass" amount="64" slot="8" team-color="true" />
+                <item material="iron pickaxe" amount="1" slot="2" unbreakable="true" prevent-sharing="true">
+                    <enchantment level="3">efficiency</enchantment>
+                </item>
+                <item material="iron axe" amount="1" slot="3" unbreakable="true" prevent-sharing="true">
+                    <enchantment level="3">efficiency</enchantment>
+                </item>
+                <item material="shears" amount="1" slot="7" unbreakable="true" prevent-sharing="true" />
+                <item material="bow" amount="1" slot="4" unbreakable="true" prevent-sharing="true">
+                    <enchantment>infinity</enchantment>
+                </item>
+                <item material="arrow" amount="1" slot="17" />
+            </kit>
+        </class>
+        <class name="Resource Gatherer" description="${gatherer_description}" icon="iron pickaxe">
+            <kit>
+                <head name="Beaver" uuid="71500e55-b803-4905-ad10-9e6cb485e892" slot="slot.armor.head" locked="true">
+                    <skin>ewogICJ0aW1lc3RhbXAiIDogMTcwODEzNTE3ODI3NSwKICAicHJvZmlsZUlkIiA6ICI3MTUwMGU1NWI4MDM0OTA1YWQxMDllNmNiNDg1ZTg5MiIsCiAgInByb2ZpbGVOYW1lIiA6ICJTdGltcGF5RzBEIiwKICAidGV4dHVyZXMiIDogewogICAgIlNLSU4iIDogewogICAgICAidXJsIiA6ICJodHRwOi8vdGV4dHVyZXMubWluZWNyYWZ0Lm5ldC90ZXh0dXJlL2RhZTIyZDIxNjY1NzkwNzFiYjAzMWU5MmNlMzlkMDAyOGE4ZGE4MmNlNTYxNzExMjM3NTVlNDhkMDVhZWFkYTAiCiAgICB9CiAgfQp9</skin>
+                </head>
+                <chestplate material="leather chestplate" team-color="true" unbreakable="true" locked="true">
+                    <enchantment>aqua_affinity</enchantment>
+                </chestplate>
+                <leggings material="leather leggings" team-color="true" unbreakable="true" locked="true">
+                    <enchantment>aqua_affinity</enchantment>
+                </leggings>
+                <boots material="leather boots" team-color="true" unbreakable="true" locked="true">
+                    <enchantment>aqua_affinity</enchantment>
+                </boots>
+                <item material="stone sword" amount="1" slot="0" unbreakable="true" prevent-sharing="true" />
+                <item material="stained clay" amount="64" slot="1" team-color="true" />
+                <item material="stained glass" amount="64" slot="8" team-color="true" />
+                <item material="iron pickaxe" amount="1" slot="2" unbreakable="true" prevent-sharing="true">
+                    <enchantment level="1">efficiency</enchantment>
+                </item>
+                <item material="shears" amount="1" slot="4" unbreakable="true" prevent-sharing="true" />
+                <item material="iron axe" amount="1" slot="3" unbreakable="true" prevent-sharing="true">
+                    <enchantment level="1">efficiency</enchantment>
+                </item>
+                <item material="stick" amount="1" slot="7" unbreakable="true" prevent-sharing="true">
+                    <enchantment level="1">knockback</enchantment>
+                </item>
+            </kit>
+        </class>
+    </classes>
+
+    <hunger>
+        <depletion>off</depletion>
+    </hunger>
+    <maxbuildheight>200</maxbuildheight>
+</map>
