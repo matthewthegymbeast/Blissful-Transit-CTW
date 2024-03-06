@@ -9,12 +9,15 @@
     </authors>
     <contributors>
         <contributor uuid="1987fc00-a5b2-43b5-b94b-e3c0d25776e9" contribution="Feedback" /> <!-- BrettOgden -->
+        <contributor uuid="7755ac32-2fba-4ef6-a85b-93c354267a91" contribution="Feedback, ideas" /> <!-- confect1on -->
+        <contributor uuid="a9f11454-beac-4cc3-a138-1780802c8794" contribution="Feedback, ideas" /> <!-- Crazy_ -->
         <contributor uuid="654a9fe7-c75c-4b45-91df-8d48c4a5e072" contribution="Feedback, ideas" /> <!--Flamiix -->
         <contributor uuid="811c1b4c-e123-421d-b918-d8fed782c639" contribution="Name suggestion" /> <!-- Gabuski -->
         <contributor uuid="f8753ae6-a7ed-4d88-8d6d-537a5b1687e4" contribution="Feedback" /> <!-- guini2 -->
         <contributor uuid="38ef938a-7020-4c04-9d12-4875ed0598ca" contribution="Feedback" /> <!-- Kazoha -->
         <contributor uuid="644521d7-9437-47c1-b1d2-698eb757df3d" contribution="Feedback" /> <!-- minuyo -->
         <contributor uuid="f690a591-348b-482e-a18d-7779d0c0a28c" contribution="XML help" /> <!-- mitchiii -->
+        <contributor uuid="534470be-4122-4762-83e1-f45abb474cdc" contribution="Feedback, testing, hosting" /> <!-- Necrozma -->
         <contributor uuid="f34625ab-8f27-4cb5-8424-671fa82d4033" contribution="Ideas" /> <!-- Nidho0gg -->
         <contributor uuid="924c4e61-57b6-4931-afdb-6525b2ed34c0" contribution="Feedback, testing" /> <!-- OAF6 -->
         <contributor uuid="e82603df-417d-4a95-bd1f-1720648be0b4" contribution="Feedback, XML help" /> <!-- Pablete1234 -->
@@ -70,7 +73,6 @@
     </constants>
 
     <variables>
-        <variable id="is_using_jump_pad" scope="player" default="0" />
         <variable id="iron_blocks_broken_count" scope="match" default="0" />
         <variable id="redstone_blocks_broken_count" scope="match" default="0" />
     </variables>
@@ -95,7 +97,6 @@
         <tip after="20m" every="6m">Attackers can buy various helpful items in the itemshop located in their ship</tip>
         <tip after="30s" every="5m">Use /map to read the map rules!</tip>
         <tip after="10m" count="3">You can place anti-block glitch blocks such as buttons or signs on the side of your defense!</tip>
-        <tip after="25m" count="3">Whenever you're full invis you get Resistance I effect!</tip>
     </broadcasts>
     <world>
         <timeset>1000</timeset>
@@ -222,72 +223,10 @@
             <material>sign</material>
             <material>wall sign</material>
         </any>
-        <pulse id="pulse_filter" period="1s" duration="0.5s">
-            <match-running />
-        </pulse>
-        <all id="only_full_invis">
-            <effect>invisibility</effect>
-            <deny>
-                <any>
-                    <wearing ignore-durability="true" ignore-metadata="true" ignore-name="true" ignore-enchantments="true">
-                        <item material="iron helmet" />
-                    </wearing>
-                    <wearing ignore-durability="true" ignore-metadata="true" ignore-name="true" ignore-enchantments="true">
-                        <item material="iron chestplate" />
-                    </wearing>
-                    <wearing ignore-durability="true" ignore-metadata="true" ignore-name="true" ignore-enchantments="true">
-                        <item material="iron leggings" />
-                    </wearing>
-                    <wearing ignore-durability="true" ignore-metadata="true" ignore-name="true" ignore-enchantments="true">
-                        <item material="iron boots" />
-                    </wearing>
-                    <wearing ignore-durability="true" ignore-metadata="true" ignore-name="true" ignore-enchantments="true">
-                        <item material="leather helmet" />
-                    </wearing>
-                    <wearing ignore-durability="true" ignore-metadata="true" ignore-name="true" ignore-enchantments="true">
-                        <item material="leather chestplate" />
-                    </wearing>
-                    <wearing ignore-durability="true" ignore-metadata="true" ignore-name="true" ignore-enchantments="true">
-                        <item material="leather leggings" />
-                    </wearing>
-                    <wearing ignore-durability="true" ignore-metadata="true" ignore-name="true" ignore-enchantments="true">
-                        <item material="leather boots" />
-                    </wearing>
-                    <wearing ignore-durability="true" ignore-metadata="true" ignore-name="true" ignore-enchantments="true">
-                        <item material="chainmail helmet" />
-                    </wearing>
-                    <wearing ignore-durability="true" ignore-metadata="true" ignore-name="true" ignore-enchantments="true">
-                        <item material="chainmail chestplate" />
-                    </wearing>
-                    <wearing ignore-durability="true" ignore-metadata="true" ignore-name="true" ignore-enchantments="true">
-                        <item material="chainmail chestplate" />
-                    </wearing>
-                    <wearing ignore-durability="true" ignore-metadata="true" ignore-name="true" ignore-enchantments="true">
-                        <item material="chainmail leggings" />
-                    </wearing>
-                    <wearing ignore-durability="true" ignore-metadata="true" ignore-name="true" ignore-enchantments="true">
-                        <item material="chainmail boots" />
-                    </wearing>
-                    <wearing ignore-durability="true" ignore-metadata="true" ignore-name="true" ignore-enchantments="true">
-                        <item material="skull item" />
-                    </wearing>
-                </any>
-            </deny>
-        </all>
-        <all id="only_invis_resistance">
-            <deny>
-                <effect>invisibility</effect>
-            </deny>
-            <effect amplifier="1">resistance</effect>
-        </all>
         <deny id="deny_anvils">
             <material>anvil</material>
         </deny>
         <material id="only_tnt">tnt</material>
-        <all id="stopped_using_jump_pad">
-            <variable var="is_using_jump_pad">1</variable>
-            <grounded />
-        </all>
         <any id="only_terrain_blocks">
             <material>stone:6</material>
             <material>stone:5</material>
@@ -301,6 +240,9 @@
         <after id="all_redstone_broken_delay" duration="${iron_redstone_renewables_interval}">
             <variable id="all_redstone_broken" var="redstone_blocks_broken_count">152</variable>
         </after>
+        <pulse id="pulse_filter" period="1s" duration="0.5s">
+            <match-running />
+        </pulse>
     </filters>
 
     <regions>
@@ -339,34 +281,14 @@
 
         <union id="jump_pads">
             <cuboid id="red_jump_pad1" min="-56.5,59,-130.5" max="-54.5,60,-128.5" />
-            <cuboid id="red_jump_pad1_boost1" min="-56.5,100,-130.5" max="-54.5,120,-128.5" />
-            <cuboid id="red_jump_pad1_boost2" min="-56.5,130,-130.5" max="-54.5,160,-128.5" />
-            <cuboid id="red_jump_pad1_boost3" min="-48.5,175,-90.5" max="-54.5,200,-98.5" />
             <cuboid id="red_jump_pad2" min="55.5,59,-130.5" max="57.5,120,-128.5" />
-            <cuboid id="red_jump_pad2_boost1" min="55.5,100,-130.5" max="57.5,120,-128.5" />
-            <cuboid id="red_jump_pad2_boost2" min="55.5,130,-130.5" max="57.5,160,-128.5" />
-            <cuboid id="red_jump_pad2_boost3" min="50.5,175,-96.5" max="62.5,200,-98.5" />
             <cuboid id="red_jump_pad3" min="-24.5,64,-153.5" max="-22.5,65,-151.5" />
-            <cuboid id="red_jump_pad3_boost1" min="-24.5,100,-153.5" max="-22.5,120,-151.5" />
-            <cuboid id="red_jump_pad3_boost2" min="-24.5,130,-153.5" max="-22.5,160,-151.5" />
-            <cuboid id="red_jump_pad3_boost3" min="-16.5,175,-119.5" max="-22.5,200,-121.5" />
-            <cuboid id="red_jump_pad3_boost4" min="-16.5,172,-95.5" max="-22.5,200,-100.5" />
             <cuboid id="red_jump_pad4" min="-24.5,57,-208.5" max="-22.5,58,-207.5" />
             <cuboid id="red_jump_pad4_boost" min="-24.5,68,-208.5" max="-22.5,66,-206.5" />
 
             <cuboid id="blue_jump_pad1" min="57.5,59,63.5" max="55.5,60,61.5" />
-            <cuboid id="blue_jump_pad1_boost1" min="57.5,100,63.5" max="55.5,120,61.5" />
-            <cuboid id="blue_jump_pad1_boost2" min="57.5,130,63.5" max="55.5,160,61.5" />
-            <cuboid id="blue_jump_pad1_boost3" min="65.5,175,27.5" max="48.5,200,31.5" />
             <cuboid id="blue_jump_pad2" min="-54.5,59,63.5" max="-56.5,120,61.5" />
-            <cuboid id="blue_jump_pad2_boost1" min="-54.5,100,63.5" max="-56.5,120,61.5" />
-            <cuboid id="blue_jump_pad2_boost2" min="-54.5,130,63.5" max="-56.5,160,61.5" />
-            <cuboid id="blue_jump_pad2_boost3" min="-52.5,175,39.5" max="-65.5,200,25.5" />
             <cuboid id="blue_jump_pad3" min="25.5,64,86.5" max="23.5,65,84.5" />
-            <cuboid id="blue_jump_pad3_boost1" min="25.5,100,86.5" max="23.5,120,84.5" />
-            <cuboid id="blue_jump_pad3_boost2" min="25.5,130,86.5" max="23.5,160,84.5" />
-            <cuboid id="blue_jump_pad3_boost3" min="17.5,175,45.5" max="23.5,200,54.5" />
-            <cuboid id="blue_jump_pad3_boost4" min="17.5,172,29.5" max="23.5,200,33.5" />
             <cuboid id="blue_jump_pad4" min="23.5,57,140.5" max="25.5,58,141.5" />
             <cuboid id="blue_jump_pad4_boost" min="23.5,66,139.5" max="27.5,68,141.5" />
         </union>
@@ -405,11 +327,6 @@
         <cuboid id="red_arena_exit" min="-1.5,167,-77.5" max="2.5,172,-69.5" />
         <cuboid id="blue_arena_exit" min="-1.5,172,2.5" max="2.5,167,10.5" />
 
-        <!-- <cuboid id="arena_landing_platform1" min="-32.5,167,-66.5" max="-24.5,175,-58.5" />
-        <cuboid id="arena_landing_platform2" min="33.5,167,-66.5" max="25.5,175,-58.5" />
-        <cuboid id="arena_landing_platform3" min="25.5,175,-8.5" max="33.5,167,-0.5" />
-        <cuboid id="arena_landing_platform4" min="-24.5,175,-8.5" max="-32.5,167,-0.5" /> -->
-
         <cuboid id="arena" min="-33.5,162,-77.5" max="35.5,186,10.5" />
         <cuboid id="middle_area" min="-83.5,0,-54.5" max="84.5,126,-12.5" />
         <union id="ships">
@@ -429,11 +346,6 @@
             <rectangle id="blue_ship_space1" min="8.5,78.5" max="40.5,150.5" />
             <rectangle id="blue_ship_space2" min="-39.5,78.5" max="-7.5,150.5" />
         </union>
-
-        <!-- <union id="islands">
-            <rectangle id="red_island" min="-50.5,-217.5" max="52.5,-129.5" />
-            <rectangle id="blue_island" min="-50.5,-62.5" max="51.5,62.5" />
-        </union> -->
 
         <union id="arena_iron_blocks">
             <union>
@@ -475,6 +387,28 @@
             <cuboid min="-29.5,167,-29.5" max="-26.5,169,-26.5" />
             <cuboid min="27.5,167,-40.5" max="30.5,169,-41.5" />
         </union>
+        <union id="arena_anti_block_glitch">
+            <cuboid min="39.5,166,-33.5" max="39.5,188,-33.5" />
+            <cuboid min="32.5,174,-33.5" max="32.5,188,-33.5" />
+            <cuboid min="-31.5,175,-33.5" max="-31.5,188,-33.5" />
+            <cuboid min="-38.5,167,-33.5" max="-38.5,188,-33.5" />
+        </union>
+
+        <union id="arena_platform_teleport_destinations">
+            <point id="arena_platform_teleport_destination1">-31.5,167,-65.5</point>
+            <point id="arena_platform_teleport_destination2">32.5,167,-65.5</point>
+            <point id="arena_platform_teleport_destination3">32.5,167,-1.5</point>
+            <point id="arena_platform_teleport_destination4">-31.5,167,-1.5</point>
+        </union>
+        <union id="arena_platform_teleports">
+            <cuboid id="red_arena_platform_teleport1" min="-56.5,100,-130.5" max="-54.5,105,-128.5" />
+            <cuboid id="red_arena_platform_teleport2" min="55.5,100,-130.5" max="57.5,105,-128.5" />
+            <cuboid id="red_arena_platform_teleport3" min="-24.5,100,-153.5" max="-22.5,105,-151.5" />
+
+            <cuboid id="blue_arena_platform_teleport1" min="57.5,100,63.5" max="55.5,105,61.5" />
+            <cuboid id="blue_arena_platform_teleport2" min="-54.5,100,63.5" max="-56.5,105,61.5" />
+            <cuboid id="blue_arena_platform_teleport3" min="25.5,100,86.5" max="23.5,105,84.5" />
+        </union>
 
         <apply region="red_spawns_regions" enter="only_red" message="${no_enemy_spawn_access}" />
         <apply region="red_spawns_regions" block="never" />
@@ -500,18 +434,8 @@
         <apply region="red_jump_pads_rectangles" block-place="never" block-break="never" />
 
         <apply region="red_jump_pad1" velocity="0,5,0" />
-        <apply region="red_jump_pad1_boost1" velocity="0,5,0" />
-        <apply region="red_jump_pad1_boost2" velocity="0.5,5,100" />
-        <apply region="red_jump_pad1_boost3" velocity="2.5,0.1,4" />
         <apply region="red_jump_pad2" velocity="0,5,0" />
-        <apply region="red_jump_pad2_boost1" velocity="0,5,0" />
-        <apply region="red_jump_pad2_boost2" velocity="0.5,5,100" />
-        <apply region="red_jump_pad2_boost3" velocity="-3.5,0.1,4" />
         <apply region="red_jump_pad3" velocity="0,5,0" />
-        <apply region="red_jump_pad3_boost1" velocity="0,5,0" />
-        <apply region="red_jump_pad3_boost2" velocity="0.5,5,100" />
-        <apply region="red_jump_pad3_boost3" velocity="0,0.5,10" />
-        <apply region="red_jump_pad3_boost4" velocity="-1,0,5" />
         <apply region="red_jump_pad4" velocity="0,2,0" />
         <apply region="red_jump_pad4_boost" velocity="0,0,1.5" />
 
@@ -520,18 +444,8 @@
         <apply region="blue_jump_pads_rectangles" block-place="never" block-break="never" />
 
         <apply region="blue_jump_pad1" velocity="0,5,0" />
-        <apply region="blue_jump_pad1_boost1" velocity="0,5,0" />
-        <apply region="blue_jump_pad1_boost2" velocity="-0.5,5,-100" />
-        <apply region="blue_jump_pad1_boost3" velocity="-2.5,0.1,-4" />
         <apply region="blue_jump_pad2" velocity="0,5,0" />
-        <apply region="blue_jump_pad2_boost1" velocity="0,5,0" />
-        <apply region="blue_jump_pad2_boost2" velocity="-0.5,5,-100" />
-        <apply region="blue_jump_pad2_boost3" velocity="3.5,0.1,-4" />
         <apply region="blue_jump_pad3" velocity="0,5,0" />
-        <apply region="blue_jump_pad3_boost1" velocity="0,5,0" />
-        <apply region="blue_jump_pad3_boost2" velocity="-0.5,5,-100" />
-        <apply region="blue_jump_pad3_boost3" velocity="-0,0.5,-10" />
-        <apply region="blue_jump_pad3_boost4" velocity="1,0,-5" />
         <apply region="blue_jump_pad4" velocity="0,2,0" />
         <apply region="blue_jump_pad4_boost" velocity="0,0,-1.5" />
 
@@ -546,6 +460,7 @@
         <apply region="ships_spaces" block-place="only_anti_glitch_blocks" message="${no_building_over_void}" />
         <apply region="ships_spaces" block-break="only_anti_glitch_blocks" message="${no_block_break_access}" />
         <apply region="everywhere" use="deny_anvils" message="${no_anvil_access}" />
+        <apply region="arena_anti_block_glitch" enter="never" />
     </regions>
 
     <kits>
@@ -586,14 +501,6 @@
             <effect duration="6" amplifier="1">regeneration</effect>
             <effect duration="3" amplifier="1">speed</effect>
         </kit>
-        <kit id="invis_resistance" filter="only_full_invis">
-            <effect duration="oo" amplifier="1">resistance</effect>
-        </kit>
-        <kit id="take_invis_resistance" filter="only_invis_resistance">
-            <effect duration="oo" amplifier="1">resistance</effect>
-        </kit>
-        <give kit="invis_resistance" filter="pulse_filter" />
-        <take kit="take_invis_resistance" filter="pulse_filter" />
     </kits>
 
     <spawns>
@@ -619,16 +526,12 @@
     <actions>
         <action id="play_explode_sound" scope="player">
             <sound key="random.explode" />
-            <set var="is_using_jump_pad" value="1" />
         </action>
         <action id="replace_clay" scope="player">
             <replace-item keep-amount="true">
                 <find material="stained clay" />
                 <replace material="stained clay" team-color="true" />
             </replace-item>
-        </action>
-        <action id="not_using_jump_pad" filter="stopped_using_jump_pad" scope="player">
-            <set var="is_using_jump_pad" value="0" />
         </action>
 
         <action id="refill_iron" scope="match">
@@ -654,7 +557,6 @@
 
         <trigger filter="jump_pads" action="play_explode_sound" scope="player" />
         <trigger filter="pulse_filter" action="replace_clay" scope="player" />
-        <trigger filter="pulse_filter" action="not_using_jump_pad" scope="player" />
         <trigger filter="all_iron_broken_delay" action="refill_iron" scope="match" />
         <trigger filter="all_iron_broken" action="announce_iron_mined" scope="match" />
         <trigger filter="all_redstone_broken_delay" action="refill_redstone" scope="match" />
@@ -666,7 +568,6 @@
             <all>
                 <cause>fall</cause>
                 <any>
-                    <variable var="is_using_jump_pad">1</variable>
                     <region id="ships" />
                 </any>
             </all>
@@ -722,10 +623,6 @@
         <item>prismarine crystals</item>
     </itemkeep>
     <itemremove>
-        <item>iron helmet</item>
-        <item>iron chestplate</item>
-        <item>iron leggings</item>
-        <item>iron boots</item>
         <item>leather helmet</item>
         <item>leather chestplate</item>
         <item>leather leggings</item>
@@ -760,10 +657,6 @@
                 <item material="potion" damage="9" name="`cDrinkable Strength I `o30s `r`c`lx1" amount="1">
                     <effect duration="30s" amplifier="1">strength</effect>
                     <payment currency="prismarine crystals" price="4" color="dark aqua" />
-                </item>
-                <item material="potion" damage="14" name="`7Drinkable Invisibility `o8s `r`7`lx1" amount="1">
-                    <effect duration="8s" amplifier="1">invisibility</effect>
-                    <payment currency="prismarine crystals" price="15" color="dark aqua" />
                 </item>
                 <item material="potion" damage="16386" name="`bSplashable Speed II `o1m `r`b`lx1" amount="1">
                     <effect duration="1m" amplifier="2">speed</effect>
@@ -871,6 +764,14 @@
         <portal region="blue_arena_exit_teleport" destination="blue_spawn1" yaw="@-180" pitch="@0" />
         <portal region="arena_void" destination="deep_void" pitch="@90" sound="false" />
         <portal region="void" destination="deep_void" pitch="@90" sound="false" />
+
+        <portal region="red_arena_platform_teleport1" destination="arena_platform_teleport_destination1" yaw="@-45" pitch="@0" />
+        <portal region="red_arena_platform_teleport2" destination="arena_platform_teleport_destination2" yaw="@45" pitch="@0" />
+        <portal region="red_arena_platform_teleport3" destination="arena_platform_teleport_destination1" yaw="@-45" pitch="@0" />
+
+        <portal region="blue_arena_platform_teleport1" destination="arena_platform_teleport_destination3" yaw="@135" pitch="@0" />
+        <portal region="blue_arena_platform_teleport2" destination="arena_platform_teleport_destination4" yaw="@-135" pitch="@0" />
+        <portal region="blue_arena_platform_teleport3" destination="arena_platform_teleport_destination3" yaw="@135" pitch="@0" />
     </portals>
 
     <crafting>
@@ -900,7 +801,6 @@
                 <item material="stained glass" amount="64" slot="8" team-color="true" />
                 <item material="iron pickaxe" amount="1" slot="2" unbreakable="true" prevent-sharing="true" />
                 <item material="stone axe" amount="1" slot="3" unbreakable="true" prevent-sharing="true" />
-                <item material="shears" amount="1" slot="7" unbreakable="true" prevent-sharing="true" />
                 <item material="bow" amount="1" slot="4" unbreakable="true" prevent-sharing="true">
                     <enchantment>infinity</enchantment>
                 </item>
